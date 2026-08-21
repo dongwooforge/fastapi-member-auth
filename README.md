@@ -295,3 +295,9 @@ Git Commit
 ```
 
 코드, 테스트, 문서가 서로 일치하도록 유지하는 것을 목표로 합니다.
+
+## Documentation
+
+- [`API Documentation`](docs/api.md) - 엔드포인트, 요청/응답, 인증 요구사항
+- [`Authentication`](docs/authentication.md) - JWT, Refresh Token Rotation, 토큰 무효화 구조
+- [`Database`](docs/database.md) - 데이터 모델, Soft Delete, Refresh Token 저장 구조
