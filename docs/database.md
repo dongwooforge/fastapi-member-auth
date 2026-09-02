@@ -18,8 +18,8 @@ FastAPI
 MySQL 8.4
    │
    ├── members
-   │
-   └── refresh_tokens
+   ├── refresh_tokens
+   └── email_verifications
 ```
 
 애플리케이션의 데이터베이스 연결 정보는 `.env`의 `DATABASE_URL`을 통해 관리합니다.
@@ -304,6 +304,77 @@ Refresh C → revoke
 
 ---
 
+
+## email_verifications 테이블
+
+`email_verifications` 테이블은 회원가입 전 이메일 소유권 확인을 위한 인증 상태를 저장합니다.
+
+| Column | 설명 |
+|---|---|
+| `id` | 이메일 인증 기록 PK |
+| `email` | 인증 대상 이메일 |
+| `code_hash` | 인증번호 Hash |
+| `expires_at` | 인증번호 만료 시각 |
+| `verified_at` | 인증 성공 시각 |
+| `attempt_count` | 잘못된 인증번호 입력 횟수 |
+| `created_at` | 인증 요청 생성 시각 |
+
+### 인증번호 저장
+
+인증번호 원문은 데이터베이스에 저장하지 않습니다.
+
+```text
+6자리 인증번호
+      ↓
+Hash
+      ↓
+code_hash 저장
+```
+
+### 인증 만료
+
+인증번호는 발급 후 5분 동안 유효합니다.
+
+```text
+현재 시각 < expires_at
+→ 사용 가능
+
+현재 시각 >= expires_at
+→ 만료
+```
+
+### 인증 성공
+
+인증번호가 올바르면 `verified_at`에 인증 완료 시각을 기록합니다.
+
+```text
+verified_at = NULL
+→ 미인증
+
+verified_at != NULL
+→ 인증 완료
+```
+
+회원가입 시에는 인증 완료 여부뿐 아니라 인증 기록의 유효시간도 확인합니다.
+
+### 인증 시도 횟수
+
+잘못된 인증번호를 입력하면 `attempt_count`를 증가시킵니다.
+
+현재 최대 인증 시도 횟수는 5회입니다.
+
+```text
+잘못된 인증번호
+      ↓
+attempt_count + 1
+      ↓
+5회 도달
+      ↓
+추가 인증 시도 차단
+```
+
+
+
 ## 12. 데이터 접근 계층
 
 회원 관련 데이터베이스 처리는 `app/members/db.py`에서 담당합니다.
@@ -411,6 +482,19 @@ pytest -v
 │ expires_at          │
 │ revoked_at          │
 └─────────────────────┘
+
+
+┌─────────────────────────┐
+│  email_verifications    │
+├─────────────────────────┤
+│ id                      │
+│ email                   │
+│ code_hash               │
+│ expires_at              │
+│ verified_at             │
+│ attempt_count           │
+│ created_at              │
+└─────────────────────────┘
 ```
 
 `members`는 서비스 회원의 상태를 관리하고,

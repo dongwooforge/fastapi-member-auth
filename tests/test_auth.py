@@ -1,14 +1,6 @@
 from app.members.model import Member
+from tests.helpers import signup_user
 
-def signup_user(client):
-    return client.post(
-        "/members",
-        json={
-            "email": "auth@test.com",
-            "name": "인증테스트",
-            "password": "Abcd1234!"
-        }
-    )
 
 
 def login_user(client):

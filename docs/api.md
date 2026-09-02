@@ -12,13 +12,113 @@ Authorization: Bearer <access_token>
 
 ---
 
-## 1. 회원가입
+## 1. 이메일 인증번호 요청
 
-`POST /members`
+`POST /email-verifications`
 
 ### 권한
 
 없음
+
+### Request Body
+
+```json
+{
+  "email": "test@test.com"
+}
+```
+
+### Response 200
+
+현재 개발 단계에서는 테스트를 위해 인증번호를 응답에 포함합니다.
+
+```json
+{
+  "message": "인증번호가 생성되었습니다.",
+  "verification_code": "482193"
+}
+```
+
+> 실제 이메일 발송 기능을 연결한 이후에는 `verification_code`를 API 응답에서 제거해야 합니다.
+
+### 동작
+
+- 6자리 인증번호 생성
+- 인증번호 Hash 저장
+- 인증번호 유효시간 5분
+- 최대 인증 시도 횟수 5회
+
+### Error
+
+**422 Unprocessable Entity**
+- 이메일 형식 오류
+
+---
+
+## 2. 이메일 인증번호 확인
+
+`POST /email-verifications/verify`
+
+### 권한
+
+없음
+
+### Request Body
+
+```json
+{
+  "email": "test@test.com",
+  "code": "482193"
+}
+```
+
+### Response 200
+
+```json
+{
+  "message": "이메일 인증이 완료되었습니다."
+}
+```
+
+### 동작
+
+인증 성공 시 해당 인증 기록의 `verified_at`에 인증 완료 시각을 기록합니다.
+
+인증이 완료된 이메일만 회원가입에 사용할 수 있습니다.
+
+### Error
+
+**400 Bad Request**
+- 인증번호 불일치
+- 인증번호 만료
+
+**404 Not Found**
+- 이메일 인증 요청이 존재하지 않음
+
+**409 Conflict**
+- 이미 인증 완료된 인증번호
+
+**429 Too Many Requests**
+- 인증번호 입력 가능 횟수 초과
+
+
+
+## 3. 회원가입
+
+`POST /members`
+
+### 사전 조건
+
+이메일 인증 완료 필요
+
+회원가입에 사용할 이메일은 먼저 이메일 인증을 완료해야 합니다.
+
+```text
+POST /email-verifications
+        ↓
+POST /email-verifications/verify
+        ↓
+POST /members
 
 ### Request Body
 
@@ -51,7 +151,7 @@ Authorization: Bearer <access_token>
 
 ---
 
-## 2. 로그인
+## 4. 로그인
 
 `POST /login`
 
@@ -85,7 +185,7 @@ Authorization: Bearer <access_token>
 
 ---
 
-## 3. 내 회원정보 조회
+## 5. 내 회원정보 조회
 
 `GET /members/me`
 
@@ -119,7 +219,7 @@ Authorization: Bearer <access_token>
 
 ---
 
-## 4. 내 회원정보 수정
+## 6. 내 회원정보 수정
 
 `PATCH /members/me`
 
@@ -167,7 +267,7 @@ Authorization: Bearer <access_token>
 
 ---
 
-## 5. 비밀번호 변경
+## 7. 비밀번호 변경
 
 `PATCH /members/me/password`
 
@@ -221,7 +321,7 @@ Authorization: Bearer <access_token>
 
 ---
 
-## 6. Access Token 재발급
+## 8. Access Token 재발급
 
 `POST /refresh`
 
@@ -273,7 +373,7 @@ Refresh Token B 발급
 
 ---
 
-## 7. 로그아웃
+## 9. 로그아웃
 
 `POST /logout`
 
@@ -310,7 +410,7 @@ Refresh Token B 발급
 
 ---
 
-## 8. 회원 탈퇴
+## 10. 회원 탈퇴
 
 `DELETE /members/me`
 

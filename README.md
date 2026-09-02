@@ -39,6 +39,7 @@ FastAPI 기반의 회원 관리 및 JWT 인증 API 프로젝트입니다.
 - 이메일 형식 검증
 - 비밀번호 정책 검증
 - 이메일 중복 방지
+- 이메일 인증
 - 내 회원정보 조회
 - 내 회원정보 수정
 - 비밀번호 변경
@@ -50,6 +51,7 @@ FastAPI 기반의 회원 관리 및 JWT 인증 API 프로젝트입니다.
 - JWT Refresh Token 발급
 - Access Token 기반 API 인증
 - Refresh Token 기반 Access Token 재발급
+- 이메일 인증
 
 ### 보안
 - 비밀번호 Hash 저장
@@ -164,7 +166,8 @@ fastapi/
 | PATCH | `/members/me` | 내 회원정보 수정 | Access Token |
 | PATCH | `/members/me/password` | 비밀번호 변경 | Access Token |
 | DELETE | `/members/me` | 회원 탈퇴 | Access Token |
-
+| POST | `/email-verifications` | 이메일 인증번호 요청 | 없음 |
+| POST | `/email-verifications/verify` | 이메일 인증번호 확인 | 없음 |
 자세한 요청/응답 및 오류 명세는 [`docs/api.md`](docs/api.md)를 참고하세요.
 
 ---

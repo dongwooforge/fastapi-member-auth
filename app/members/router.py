@@ -36,7 +36,9 @@ from app.members.service import (
     change_password
 )
 
-
+from app.email_verifications.service import (
+    is_email_verified
+)
 
 router = APIRouter()
 
@@ -53,6 +55,16 @@ def signup(
     user: UserCreate,
     db: Session = Depends(get_db)
 ):
+    # 이메일 인증 여부 확인
+    if not is_email_verified(
+        db,
+        user.email
+    ):
+        raise HTTPException(
+            status_code=403,
+            detail="이메일 인증이 필요합니다."
+        )
+
     # 회원가입 처리
     new_user = create_user(
         db,
